@@ -1,6 +1,6 @@
 import "../styles/chart.css";
-function MetricChart({ title, value, unit, delta, values, color }) {
-  if (!values?.length) return <article className="chart-card chart-empty"><p>{title}</p><strong>{value ?? "—"}<span>{unit}</span></strong><div>No chart data received.</div></article>;
+function MetricChart({ title, value, unit, delta, values, color = "#8b7cff" }) {
+  if (!values?.length) return <article className="chart-card chart-empty"><div><p>{title}</p><strong>{value ?? "—"}<span>{unit}</span></strong></div><svg className="chart-placeholder" viewBox="0 0 300 76" preserveAspectRatio="none" aria-hidden="true"><path className="placeholder-area" d="M0 65 L32 54 L64 58 L96 37 L128 49 L160 26 L192 40 L224 20 L258 29 L300 8 L300 76 L0 76 Z" /><path className="placeholder-line" d="M0 65 L32 54 L64 58 L96 37 L128 49 L160 26 L192 40 L224 20 L258 29 L300 8" /></svg><div>Awaiting time-series data</div></article>;
   const width = 500, height = 128, pad = 5;
   const max = Math.max(...values), min = Math.min(...values);
   const points = values.map((v, i) => `${(i / (values.length - 1)) * width},${height - pad - ((v - min) / (max - min || 1)) * (height - 20)}`).join(" ");

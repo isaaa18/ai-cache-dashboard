@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
-import Sidebar from "./components/Sidebar";
 import ControlPanel from "./components/ControlPanel";
 import StatCard from "./components/StatCard";
 import MetricChart from "./components/MetricChart";
@@ -9,10 +8,15 @@ import LiveLogs from "./components/LiveLogs";
 import { cacheApi } from "./services/cacheApi";
 import "./styles/dashboard.css";
 
-const menuItems = ["Overview", "Experiments", "Analytics", "Event log", "Settings"];
+const emptyStats = ["Hit rate", "Average latency", "Requests served", "Evictions", "Memory use", "Policy confidence"];
+const emptyCharts = [
+  { title: "Hit rate", unit: "%" },
+  { title: "Latency", unit: "ms" },
+  { title: "Throughput", unit: "req/s" },
+  { title: "Memory usage", unit: "%" },
+];
 
 function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [running, setRunning] = useState(false);
   const [workload, setWorkload] = useState("Product catalogue");
   const [cacheSize, setCacheSize] = useState(512);
@@ -63,18 +67,20 @@ function App() {
   }
 
   return (
-    <div className={`app-shell ${sidebarOpen ? "sidebar-expanded" : "sidebar-collapsed"}`}>
-      <Sidebar open={sidebarOpen} items={menuItems} />
+    <div className="app-shell">
       <div className="app-main">
-        <Navbar onMenuClick={() => setSidebarOpen((open) => !open)} running={running} />
+        <Navbar running={running} />
         <main className="dashboard-content">
           <section className="page-heading">
             <div>
-              <p className="eyebrow">OPERATIONS / LIVE</p>
-              <h1>Cache performance, in context.</h1>
-              <p className="subtitle">Compare eviction behavior and tune the workload without losing the signal.</p>
+              <p className="eyebrow">SMRITI / OPERATIONS</p>
+              <h1>Smart memory, clearly observed.</h1>
+              <p className="subtitle">Monitor replacement decisions and tune cache workloads from one focused operational view.</p>
             </div>
-            <div className="last-updated">Last refresh <strong>{snapshot.updatedAt ?? "—"}</strong></div>
+            <div className="heading-meta">
+              <span className={`service-indicator ${connectionError ? "offline" : ""}`}><i />{connectionError ? "API offline" : "API connected"}</span>
+              <div className="last-updated">Last refresh <strong>{snapshot.updatedAt ?? "—"}</strong></div>
+            </div>
           </section>
 
           <ControlPanel
@@ -91,11 +97,11 @@ function App() {
           {connectionError && <p className="connection-notice">{connectionError}</p>}
 
           <section className="stats-grid" aria-label="Current performance statistics">
-            {snapshot.stats.length ? snapshot.stats.map((stat) => <StatCard key={stat.label} {...stat} />) : <div className="empty-dashboard-state">No performance metrics received yet.</div>}
+            {snapshot.stats.length ? snapshot.stats.map((stat) => <StatCard key={stat.label} {...stat} />) : emptyStats.map((label) => <StatCard key={label} label={label} />)}
           </section>
 
           <section className="chart-grid">
-            {snapshot.charts.map((chart) => <MetricChart key={chart.title} {...chart} />)}
+            {(snapshot.charts.length ? snapshot.charts : emptyCharts).map((chart) => <MetricChart key={chart.title} {...chart} />)}
           </section>
 
           <section className="lower-grid">
